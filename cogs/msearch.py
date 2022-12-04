@@ -103,5 +103,5 @@ class Msearch(commands.Cog):
                     await reply_embed.clear_reactions()
 
 
-def setup(bot):
-    bot.add_cog(Msearch(bot))
+async def setup(bot):
+    await bot.add_cog(Msearch(bot))

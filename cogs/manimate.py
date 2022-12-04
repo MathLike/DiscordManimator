@@ -102,17 +102,17 @@ class Manimate(commands.Cog):
 
                     if config.NO_DOCKER:
                         proc = subprocess.run(
-                            f"timeout 120 manim -ql --media_dir {tmpdirname} -o scriptoutput {'--config_file manim.cfg' if config.USE_ONLINETEX else ''} {cli_flags} {scriptfile}",
+                            f"manim -qh --media_dir {tmpdirname} -o scriptoutput {'--config_file manim.cfg' if config.USE_ONLINETEX else ''} {cli_flags} {scriptfile}",
                             shell=True,
-                            stderr=subprocess.PIPE,
+                            stderr=subprocess.PIPE
                         )
-                        if proc.stderr:
+                        if proc.returncode != 0:
                             raise ManimError(traceback=proc.stderr)
                     else:
                         manim_stderr = dockerclient.containers.run(
                             image="manimcommunity/manim:stable",
                             volumes={tmpdirname: {"bind": "/manim/", "mode": "rw"}},
-                            command=f"timeout 120 manim -qm --disable_caching --progress_bar=none -o scriptoutput {cli_flags} /manim/script.py",
+                            command=f"timeout 120 manim -qh --disable_caching --progress_bar=none -o scriptoutput {cli_flags} /manim/script.py",
                             user=os.getuid(),
                             stderr=True,
                             stdout=False,
@@ -153,6 +153,7 @@ class Manimate(commands.Cog):
                     }
                     raise e
                 else:
+                    print(outfilepath)
                     reply_args = {
                         "content": "Here you go:",
                         "file": discord.File(outfilepath),
@@ -183,5 +184,5 @@ class Manimate(commands.Cog):
         return
 
 
-def setup(bot):
-    bot.add_cog(Manimate(bot))
+async def setup(bot):
+    await bot.add_cog(Manimate(bot))
